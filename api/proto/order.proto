@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package crype;
+option go_package = "github.com/mateitudose/crype";
+
+service OrderService {
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse) {}
+}
+
+message CreateOrderRequest {
+  double amount = 1;
+  string currency = 2;
+}
+
+message CreateOrderResponse {
+  string id = 1;
+  string payment_address = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp order_expiration = 4;
+}
