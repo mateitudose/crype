@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	pb "crype/api/generated"
+	pb "crype/api/gen_proto"
 	"crype/utils"
 	"database/sql"
 	"fmt"
@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	. "crype/api/gen_jet/crype_db/public/table"
 )
 
 type CrypeServer struct {
@@ -23,13 +24,18 @@ type CrypeServer struct {
 
 func (server *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
 	paymentId := uuid.New()
-	paymentAddress, err := utils.GeneratePaymentAddress(req.Currency)
+	wallet, err := utils.GeneratePaymentAddress(req.Currency)
 	if err != nil {
+		return nil, err
+	}
+	stmt := PaymentAddresses.INSERT(PaymentAddresses.Address, PaymentAddresses.PrivateKey).VALUES(wallet.Address, wallet.PrivateKey)
+	_, err = stmt.Exec(server.db)
+	if (err != nil) {
 		return nil, err
 	}
 	return &pb.CreateOrderResponse{
 		Id:             fmt.Sprint(paymentId),
-		PaymentAddress: fmt.Sprint(paymentAddress),
+		PaymentAddress: fmt.Sprint(wallet.Address),
 		OrderExpiration: timestamppb.New(
 			time.Now().Add(time.Hour),
 		),
@@ -38,7 +44,8 @@ func (server *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderR
 }
 
 func main() {
-	err := godotenv.Load()
+	// The .env file is in the parent folder
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("failed to load .env file")
 	}

@@ -4,6 +4,12 @@ CREATE TABLE orders (
     currency VARCHAR(10) NOT NULL,
     payment_address VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP NOT NULL,
-    order_expiration TIMESTAMP NOT NULL 
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    order_expiration TIMESTAMP WITH TIME ZONE NOT NULL 
+);
+
+CREATE TABLE payment_addresses (
+    address VARCHAR(255) PRIMARY KEY,
+    private_key VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
