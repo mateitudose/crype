@@ -8,8 +8,8 @@ import (
 )
 
 type Wallet struct {
-	Address      string
-	PrivateKey   string
+	Address    string
+	PrivateKey string
 }
 
 func GeneratePaymentAddress(currency string) (Wallet, error) {
@@ -22,8 +22,8 @@ func GeneratePaymentAddress(currency string) (Wallet, error) {
 		publicKey := privateKey.PublicKey
 		address := crypto.PubkeyToAddress(publicKey)
 		return Wallet{
-			Address:      address.Hex(),
-			PrivateKey:   fmt.Sprintf("%x", crypto.FromECDSA(privateKey)),
+			Address:    address.Hex(),
+			PrivateKey: fmt.Sprintf("%x", crypto.FromECDSA(privateKey)),
 		}, nil
 	default:
 		return Wallet{}, errors.New("currency is not supported")

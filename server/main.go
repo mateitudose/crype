@@ -10,11 +10,11 @@ import (
 	"net"
 	"time"
 
+	. "crype/api/gen_jet/crype_db/public/table"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	. "crype/api/gen_jet/crype_db/public/table"
 )
 
 type CrypeServer struct {
@@ -30,7 +30,7 @@ func (server *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderR
 	}
 	stmt := PaymentAddresses.INSERT(PaymentAddresses.Address, PaymentAddresses.PrivateKey).VALUES(wallet.Address, wallet.PrivateKey)
 	_, err = stmt.Exec(server.db)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return &pb.CreateOrderResponse{
