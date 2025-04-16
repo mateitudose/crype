@@ -6,6 +6,7 @@ import (
 	"crype/utils"
 	"database/sql"
 	"fmt"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
 	"time"
@@ -14,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CrypeServer struct {
@@ -33,13 +33,19 @@ func (server *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderR
 	if err != nil {
 		return nil, err
 	}
+	orderCreation := timestamppb.Now()
+	orderExpiration := timestamppb.New(orderCreation.AsTime().Add(time.Hour))
+	stmt = Orders.INSERT(Orders.ID, Orders.Amount, Orders.Currency, Orders.PaymentAddress, Orders.CreatedAt, Orders.OrderExpiration).VALUES(
+		paymentId, req.Amount, req.Currency, wallet.Address, orderCreation.AsTime(), orderExpiration.AsTime())
+	_, err = stmt.Exec(server.db)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.CreateOrderResponse{
-		Id:             fmt.Sprint(paymentId),
-		PaymentAddress: fmt.Sprint(wallet.Address),
-		OrderExpiration: timestamppb.New(
-			time.Now().Add(time.Hour),
-		),
-		CreatedAt: timestamppb.Now(),
+		Id:              fmt.Sprint(paymentId),
+		PaymentAddress:  fmt.Sprint(wallet.Address),
+		CreatedAt:       orderCreation,
+		OrderExpiration: orderExpiration,
 	}, nil
 }
 

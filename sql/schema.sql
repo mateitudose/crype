@@ -3,7 +3,7 @@ CREATE TABLE orders (
     amount DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(10) NOT NULL,
     payment_address VARCHAR(255) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     order_expiration TIMESTAMP WITH TIME ZONE NOT NULL 
 );
