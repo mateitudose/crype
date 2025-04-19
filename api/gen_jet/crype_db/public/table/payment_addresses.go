@@ -66,7 +66,7 @@ func newPaymentAddressesTableImpl(schemaName, tableName, alias string) paymentAd
 		CreatedAtColumn  = postgres.TimestampzColumn("created_at")
 		allColumns       = postgres.ColumnList{AddressColumn, PrivateKeyColumn, CreatedAtColumn}
 		mutableColumns   = postgres.ColumnList{PrivateKeyColumn, CreatedAtColumn}
-		defaultColumns   = postgres.ColumnList{}
+		defaultColumns   = postgres.ColumnList{CreatedAtColumn}
 	)
 
 	return paymentAddressesTable{

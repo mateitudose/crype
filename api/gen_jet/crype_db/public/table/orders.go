@@ -22,6 +22,7 @@ type ordersTable struct {
 	Currency        postgres.ColumnString
 	PaymentAddress  postgres.ColumnString
 	Status          postgres.ColumnString
+	TxHash          postgres.ColumnString
 	CreatedAt       postgres.ColumnTimestampz
 	OrderExpiration postgres.ColumnTimestampz
 
@@ -70,10 +71,11 @@ func newOrdersTableImpl(schemaName, tableName, alias string) ordersTable {
 		CurrencyColumn        = postgres.StringColumn("currency")
 		PaymentAddressColumn  = postgres.StringColumn("payment_address")
 		StatusColumn          = postgres.StringColumn("status")
+		TxHashColumn          = postgres.StringColumn("tx_hash")
 		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
 		OrderExpirationColumn = postgres.TimestampzColumn("order_expiration")
-		allColumns            = postgres.ColumnList{IDColumn, AmountColumn, CurrencyColumn, PaymentAddressColumn, StatusColumn, CreatedAtColumn, OrderExpirationColumn}
-		mutableColumns        = postgres.ColumnList{AmountColumn, CurrencyColumn, PaymentAddressColumn, StatusColumn, CreatedAtColumn, OrderExpirationColumn}
+		allColumns            = postgres.ColumnList{IDColumn, AmountColumn, CurrencyColumn, PaymentAddressColumn, StatusColumn, TxHashColumn, CreatedAtColumn, OrderExpirationColumn}
+		mutableColumns        = postgres.ColumnList{AmountColumn, CurrencyColumn, PaymentAddressColumn, StatusColumn, TxHashColumn, CreatedAtColumn, OrderExpirationColumn}
 		defaultColumns        = postgres.ColumnList{StatusColumn}
 	)
 
@@ -86,6 +88,7 @@ func newOrdersTableImpl(schemaName, tableName, alias string) ordersTable {
 		Currency:        CurrencyColumn,
 		PaymentAddress:  PaymentAddressColumn,
 		Status:          StatusColumn,
+		TxHash:          TxHashColumn,
 		CreatedAt:       CreatedAtColumn,
 		OrderExpiration: OrderExpirationColumn,
 

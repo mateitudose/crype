@@ -17,7 +17,8 @@ type Orders struct {
 	Amount          float64
 	Currency        string
 	PaymentAddress  string
-	Status          string
+	Status          OrderStatus
+	TxHash          *string
 	CreatedAt       time.Time
 	OrderExpiration time.Time
 }

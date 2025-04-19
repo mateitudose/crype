@@ -47,7 +47,7 @@ A simple but secure crypto payments gateway, built with Golang.
    ```
 5. Run the server:
    ```sh
-   go run server/main.go
+   go run crype/server
    ```
 
 ### API

@@ -14,5 +14,5 @@ import (
 type PaymentAddresses struct {
 	Address    string `sql:"primary_key"`
 	PrivateKey string
-	CreatedAt  time.Time
+	CreatedAt  *time.Time
 }

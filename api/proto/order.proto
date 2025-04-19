@@ -7,6 +7,15 @@ option go_package = "github.com/mateitudose/crype";
 
 service OrderService {
   rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse) {}
+  rpc CheckOrderStatus (CheckOrderStatusRequest) returns (stream CheckOrderStatusResponse) {}
+}
+
+enum OrderStatus {
+  PENDING = 0;
+  PROCESSING = 1;
+  CONFIRMED = 2;
+  FAILED = 3;
+  CANCELED = 4;
 }
 
 message CreateOrderRequest {
@@ -19,4 +28,14 @@ message CreateOrderResponse {
   string payment_address = 2;
   google.protobuf.Timestamp created_at = 3;
   google.protobuf.Timestamp order_expiration = 4;
+}
+
+message CheckOrderStatusRequest {
+  string id = 1;
+}
+
+message CheckOrderStatusResponse {
+  string id = 1;
+  OrderStatus status = 2;
+  optional string tx_hash = 3;
 }
