@@ -1,15 +1,12 @@
-package main
+package server
 
 import (
 	"context"
 	"crype/api/gen_jet/crype_db/public/model"
 	pb "crype/api/gen_proto"
 	"crype/utils"
-	"database/sql"
 	"fmt"
 	"log"
-	"net"
-	"os"
 	"time"
 
 	// Dot import so that the Go code resembles native SQL
@@ -17,27 +14,8 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// ServerConfig holds all configuration for the server
-type ServerConfig struct {
-	Port string
-	DB   *sql.DB
-}
-
-// CrypeServer implements the OrderService gRPC server
-type CrypeServer struct {
-	pb.UnimplementedOrderServiceServer
-	db *sql.DB
-}
-
-// NewCrypeServer creates a new instance of CrypeServer
-func NewCrypeServer(db *sql.DB) *CrypeServer {
-	return &CrypeServer{db: db}
-}
 
 // CreateOrder handles the creation of a new order
 func (server *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
@@ -156,46 +134,4 @@ func (server *CrypeServer) CheckOrderStatus(req *pb.CheckOrderStatusRequest, str
 	}
 
 	return nil
-}
-
-// setupServer initializes and starts the gRPC server
-func setupServer(config *ServerConfig) error {
-	// Create network listener
-	lis, err := net.Listen("tcp", ":"+config.Port)
-	if err != nil {
-		return fmt.Errorf("failed to listen on port %s: %w", config.Port, err)
-	}
-
-	// Create gRPC server
-	s := grpc.NewServer()
-
-	// Register our service implementation
-	crypeServer := NewCrypeServer(config.DB)
-	pb.RegisterOrderServiceServer(s, crypeServer)
-
-	// Start serving requests
-	log.Printf("Server listening on :%s", config.Port)
-	if err := s.Serve(lis); err != nil {
-		return fmt.Errorf("failed to serve: %w", err)
-	}
-
-	return nil
-}
-
-func main() {
-	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Failed to load .env file: %v", err)
-	}
-
-	// Create server configuration
-	config := &ServerConfig{
-		Port: os.Getenv("CRYPE_PORT"), 
-		DB:   utils.ConnectDB(),
-	}
-
-	// Start the server
-	if err := setupServer(config); err != nil {
-		log.Fatalf("Server error: %v", err)
-	}
 }
