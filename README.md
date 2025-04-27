@@ -1,4 +1,4 @@
-# crype
+# Crype
 
 A simple but secure crypto payments gateway, built with Golang.
 
@@ -47,7 +47,7 @@ A simple but secure crypto payments gateway, built with Golang.
    ```
 5. Run the server:
    ```sh
-   go run crype/server
+   go run main.go
    ```
 
 ### API
@@ -55,18 +55,23 @@ A simple but secure crypto payments gateway, built with Golang.
 - gRPC endpoint: `localhost:8080`
 - Service: `OrderService`
   - `CreateOrder(amount, currency)` → returns order ID, payment address, timestamps
+  - `CheckOrderStatus(id)` → streaming response with order status updates and transaction hash
 
-See `api/proto/order.proto` for details.
+Both endpoints are fully implemented with database integration. The `CheckOrderStatus` endpoint provides real-time updates on payment status through server-side streaming.
+
+See `api/proto/order.proto` for complete API definitions and `server/order_service.go` for implementation details of the OrderService.
 
 ### Database
 
 - PostgreSQL, schema auto-initialized from `sql/schema.sql`
-- Tables: `orders`, `payment_addresses`
+- Tables:
+  - `orders` - Stores order information including status and transaction hash
+  - `payment_addresses` - Securely stores cryptocurrency addresses and private keys (planning to also implement additional protection of the private keys, such as encryption using KMS)
 
 ### Blockchain
 
 - Wallets generated for supported currencies (see `utils/blockchain.go`)
-- Currently supports: `USDC_BASE`
+- Currently supports: `USDC_BASE` (USD Coin on Base network)
 
 ## Development
 
