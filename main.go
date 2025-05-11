@@ -3,7 +3,7 @@ package main
 import (
 	"crype/server"
 	"crype/server/config"
-	"crype/utils"
+	"crype/server/utils"
 	"log"
 	"os"
 

@@ -1,8 +1,9 @@
 package server
 
 import (
+	"context"
 	"crype/server/config"
-	"database/sql"
+	"crype/server/service"
 	"fmt"
 	"log"
 	"net"
@@ -14,11 +15,19 @@ import (
 
 type CrypeServer struct {
 	pb.UnimplementedOrderServiceServer
-	db *sql.DB
+	orderService service.OrderServiceInterface
 }
 
-func NewCrypeServer(db *sql.DB) *CrypeServer {
-	return &CrypeServer{db: db}
+func NewCrypeServer(orderService service.OrderServiceInterface) *CrypeServer {
+	return &CrypeServer{orderService: orderService}
+}
+
+func (s *CrypeServer) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
+	return s.orderService.CreateOrder(ctx, req)
+}
+
+func (s *CrypeServer) CheckOrderStatus(req *pb.CheckOrderStatusRequest, stream pb.OrderService_CheckOrderStatusServer) error {
+	return s.orderService.CheckOrderStatus(req, stream)
 }
 
 func SetupServer(config *config.ServerConfig) error {
@@ -29,8 +38,10 @@ func SetupServer(config *config.ServerConfig) error {
 
 	s := grpc.NewServer()
 
-	// Register our service implementation
-	crypeServer := NewCrypeServer(config.DB)
+	orderRepository := service.NewOrderRepository(config.DB)
+	orderService := service.NewOrderService(orderRepository)
+
+	crypeServer := NewCrypeServer(orderService)
 	pb.RegisterOrderServiceServer(s, crypeServer)
 
 	log.Printf("Server listening on :%s", config.Port)
