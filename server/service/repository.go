@@ -1,8 +1,8 @@
 package service
 
 import (
-	"crype/api/gen_jet/crype_db/public/enum"
 	"crype/api/gen_jet/crype_db/public/model"
+	"crype/server/utils"
 	"database/sql"
 	"fmt"
 
@@ -59,12 +59,19 @@ func (r *OrderRepository) GetOrderByID(id uuid.UUID) (*model.Orders, error) {
 
 // UpdateOrderStatus updates an order's status in the database
 func (r *OrderRepository) UpdateOrderStatus(id uuid.UUID, status model.OrderStatus, txHash *string) error {
-	// TODO: Handle setting the status in the database 
-	stmt := Orders.UPDATE(Orders.Status).WHERE(Orders.ID.EQ(postgres.UUID(id))).SET(Orders.Status.SET(enum.OrderStatus.Confirmed))
-	if txHash != nil {
-		stmt = stmt.SET(Orders.TxHash.SET(postgres.String(*txHash)))
+	// Convert model.OrderStatus to postgres.StringExpression so that we can use it in the SQL query
+	statusExpr, err := utils.ModelToEnumOrderStatus(status)
+	if err != nil {
+		return fmt.Errorf("failed to convert model.OrderStatus to enum: %w", err)
 	}
-	_, err := stmt.Exec(r.db)
+	// TODO: Is there a better way to do this? Using a second SET overrides the first one...
+	var stmt postgres.Statement
+	if txHash == nil {
+		stmt = Orders.UPDATE(Orders.Status).WHERE(Orders.ID.EQ(postgres.UUID(id))).SET(Orders.Status.SET(statusExpr))
+	} else {
+		stmt = Orders.UPDATE(Orders.Status, Orders.TxHash).WHERE(Orders.ID.EQ(postgres.UUID(id))).SET(Orders.Status.SET(statusExpr), Orders.TxHash.SET(postgres.String(*txHash)))
+	}
+	_, err = stmt.Exec(r.db)
 	if err != nil {
 		return fmt.Errorf("failed to update order status: %w", err)
 	}

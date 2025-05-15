@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"crype/api/gen_jet/crype_db/public/enum"
 	"crype/api/gen_jet/crype_db/public/model"
 	pb "crype/api/gen_proto"
 	"database/sql"
 	"fmt"
+	"github.com/go-jet/jet/v2/postgres"
 	"log"
 	"os"
 
@@ -50,4 +52,22 @@ func GetProtobufOrderStatus(dbStatus model.OrderStatus) (pb.OrderStatus, bool) {
 
 	status, exists := orderStatusMap[dbStatus]
 	return status, exists
+}
+
+// ModelToEnumOrderStatus converts a model.OrderStatus to the corresponding enum.OrderStatus expression
+func ModelToEnumOrderStatus(status model.OrderStatus) (postgres.StringExpression, error) {
+	switch status {
+	case model.OrderStatus_Pending:
+		return enum.OrderStatus.Pending, nil
+	case model.OrderStatus_Processing:
+		return enum.OrderStatus.Processing, nil
+	case model.OrderStatus_Confirmed:
+		return enum.OrderStatus.Confirmed, nil
+	case model.OrderStatus_Failed:
+		return enum.OrderStatus.Failed, nil
+	case model.OrderStatus_Canceled:
+		return enum.OrderStatus.Canceled, nil
+	default:
+		return nil, fmt.Errorf("invalid order status: %s", status)
+	}
 }
